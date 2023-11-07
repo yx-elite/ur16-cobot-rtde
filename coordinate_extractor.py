@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox
 import logging
 import rtde.rtde as rtde
 import rtde.rtde_config as rtde_config
+import sys
 
 class Ur16GUI(tk.Tk):
     def __init__(self):
