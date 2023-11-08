@@ -74,7 +74,7 @@ class Ur16GUI(tk.Tk):
             reset_button.pack(side="left", padx=10)
 
             textbox = tk.Text(button_frame, height=2, width=10, wrap="word")
-            textbox.pack(fill="x", pady=5)
+            textbox.pack(fill="x", pady=(0,10))
             self.textboxes.append(textbox)
 
     def button_clicked(self, i):
