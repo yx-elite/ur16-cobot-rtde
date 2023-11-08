@@ -1,16 +1,17 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
 import logging
 import rtde.rtde as rtde
 import rtde.rtde_config as rtde_config
 import sys
+from tkinter import ttk, messagebox
+from config import ROBOT_HOST, ROBOT_PORT, config_filename
 
 class Ur16GUI(tk.Tk):
     def __init__(self):
         super().__init__()
 
         self.title("UR16 Joint Coordinate Extractor")
-        self.geometry("470x600")
+        self.geometry("480x600")
         self.config(bg = "#f0f0f0")
 
         style = ttk.Style()
@@ -28,10 +29,6 @@ class Ur16GUI(tk.Tk):
         self.ur_init()
 
     def ur_init(self):
-        ROBOT_HOST = '192.168.189.129'
-        ROBOT_PORT = 30004
-        config_filename = 'main-config.xml'
-
         logging.getLogger().setLevel(logging.INFO)
 
         conf = rtde_config.ConfigFile(config_filename)
