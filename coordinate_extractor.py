@@ -6,6 +6,7 @@ import sys
 from tkinter import ttk, messagebox
 from config import ROBOT_HOST, ROBOT_PORT, config_filename
 
+
 class Ur16GUI(tk.Tk):
     def __init__(self):
         super().__init__()
