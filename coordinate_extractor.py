@@ -66,7 +66,7 @@ class Ur16GUI(tk.Tk):
             position_frame = ttk.Frame(button_frame)
             position_frame.pack(pady=10)
 
-            button = ttk.Button(position_frame, text=f"Position {i+1}", command=lambda j=i: self.button_clicked(j))
+            button = ttk.Button(position_frame, text=f"RecordPosition {i+1}", command=lambda j=i: self.button_clicked(j))
             button.pack(side="left", padx=10)
             self.buttons.append(button)
 
@@ -87,15 +87,6 @@ class Ur16GUI(tk.Tk):
         text = current_position
         self.textboxes[i].delete("1.0", tk.END)
         self.textboxes[i].insert("1.0", text)
-
-        '''if not self.button_clicked_flags[i]:
-            self.positions.append(current_position)
-            text = current_position
-            self.textboxes[i].delete("1.0", tk.END)
-            self.textboxes[i].insert("1.0", text)
-            self.button_clicked_flags[i] = True
-        else:
-            messagebox.showinfo("showinfo", "Button was pressed before!")'''
     
     def reset_textbox(self, index):
         self.textboxes[index].delete("1.0", "end")
