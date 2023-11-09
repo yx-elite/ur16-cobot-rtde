@@ -24,13 +24,13 @@ class Ur16GUI(tk.Tk):
         self.create_instruction()
         self.create_widgets()
         
-        # Display connection status at bottom left of main window
+        # Display connection status on bottom left of main window
         status_label = ttk.Label(self, text="Status:", font=('Arial', 8))
         status_label.pack(side="left", padx=(10, 0), pady=(0, 5))
         self.connection_status = tk.StringVar()
         self.connection_status.set("Inactive")
         self.status_text_label = ttk.Label(self, textvariable=self.connection_status, font=('Arial', 8))
-        self.status_text_label.pack(side="left", padx=0, pady=(0, 5), anchor="w")
+        self.status_text_label.pack(side="left", pady=(0, 5), anchor="w")
         
 
         self.positions = []
@@ -71,8 +71,8 @@ class Ur16GUI(tk.Tk):
             messagebox.showinfo("Connection", "Connected to robot successfully!")
             
         except Exception as e:
-            # Update connection failed status to the label
-            self.connection_status.set("Data Synchronization Failed")
+            # Update inactive status to the label
+            self.connection_status.set("Connection Error")
             self.status_text_label.config(foreground="red")
             messagebox.showerror("Connection Error", "Failed to start data synchronization")
 
@@ -93,7 +93,7 @@ class Ur16GUI(tk.Tk):
             position_frame = ttk.Frame(button_frame)
             position_frame.pack(pady=10)
 
-            button = ttk.Button(position_frame, text=f"RecordPosition {i+1}", command=lambda j=i: self.button_clicked(j))
+            button = ttk.Button(position_frame, text=f"Record Position {i+1}", command=lambda j=i: self.button_clicked(j))
             button.pack(side="left", padx=10)
             self.buttons.append(button)
 
