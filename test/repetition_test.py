@@ -92,15 +92,16 @@ while keep_running:
             watchdog.input_int_register_0 = 0
             repetition_counter += 0.5
             print(repetition_counter)
+            # Take care of movement delay
+            time.sleep(1)
 
         # kick watchdog
         con.send(watchdog)
     else:
-        # Take care of robot delay. Can improve with actual_TCP_pose later
-        time.sleep(1)
-        print('---------------------------------------------')
-        print(f'{repetition} repetitions are completed successfully!')
         break
+
+print('---------------------------------------------')
+print(f'{repetition} repetitions are completed successfully!')
 
 con.send_pause()
 
