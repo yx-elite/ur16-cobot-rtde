@@ -118,6 +118,13 @@ while keep_running:
             ry.append(tcp_pose[4])
             rz.append(tcp_pose[5])
             
+            fx.append(tcp_force[0])
+            fy.append(tcp_force[1])
+            fz.append(tcp_force[2])
+            frx.append(tcp_force[3])
+            fry.append(tcp_force[4])
+            frz.append(tcp_force[5])
+            
             # Two motion in one repetition
             repetition_counter += 0.5
             print(repetition_counter)
@@ -137,19 +144,35 @@ graph_plot = True
 if graph_plot:
     fig1, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 8))
     # Plot x, y, z in one graph
-    ax1.plot(plot_time, x, label='X')
-    ax1.plot(plot_time, y, label='Y')
-    ax1.plot(plot_time, z, label='Z')
-    ax1.set_xlabel('Time')
-    ax1.set_ylabel('Position')
+    ax1.plot(plot_time, x, label='x')
+    ax1.plot(plot_time, y, label='y')
+    ax1.plot(plot_time, z, label='z')
+    ax1.set_xlabel('Operation Time (s)')
+    ax1.set_ylabel('Real Time Position Coordinate')
     ax1.legend()
     # Plot rx, ry, rz on one graph
-    ax2.plot(plot_time, rx, label='RX')
-    ax2.plot(plot_time, ry, label='RY')
-    ax2.plot(plot_time, rz, label='RZ')
-    ax2.set_xlabel('Time')
-    ax2.set_ylabel('Rotation')
+    ax2.plot(plot_time, rx, label='rx')
+    ax2.plot(plot_time, ry, label='ry')
+    ax2.plot(plot_time, rz, label='rz')
+    ax2.set_xlabel('Operation Time (s)')
+    ax2.set_ylabel('Real Time Angular Coordinate')
     ax2.legend()
+    
+    fig2, (ax3, ax4) = plt.subplots(2, 1, figsize=(8, 8))
+    # Plot Fx, Fy, Fz in one graph
+    ax3.plot(plot_time, fx, label='Fx')
+    ax3.plot(plot_time, fy, label='Fy')
+    ax3.plot(plot_time, fz, label='Fz')
+    ax3.set_xlabel('Operation Time (s)')
+    ax3.set_ylabel('Real Time Joint Force')
+    ax3.legend()
+    # Plot Frx, Fry, Frz on one graph
+    ax4.plot(plot_time, frx, label='Frx')
+    ax4.plot(plot_time, fry, label='Fry')
+    ax4.plot(plot_time, frz, label='Frz')
+    ax4.set_xlabel('Operation Time (s)')
+    ax4.set_ylabel('Real Time Joint Torque')
+    ax4.legend()
     plt.show()
     
     print('Plotting completed!')
