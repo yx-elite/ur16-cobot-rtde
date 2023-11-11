@@ -1,5 +1,3 @@
-# Connection within the apps
-
 import tkinter as tk
 import logging
 import rtde.rtde as rtde
@@ -31,7 +29,6 @@ class Ur16GUI(tk.Tk):
         self.connection_status.set("Inactive")
         self.status_text_label = ttk.Label(self, textvariable=self.connection_status, font=('Arial', 8))
         self.status_text_label.pack(side="left", pady=(0, 5), anchor="w")
-        
 
         self.positions = []
         # self.button_clicked_flags = [False] * 6

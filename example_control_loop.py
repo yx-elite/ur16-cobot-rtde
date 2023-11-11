@@ -23,13 +23,11 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import sys
-from config import ROBOT_HOST, ROBOT_PORT, config_filename
-
 sys.path.append("..")
 import logging
-
 import rtde.rtde as rtde
 import rtde.rtde_config as rtde_config
+from config import ROBOT_HOST, ROBOT_PORT, config_filename
 
 
 # logging.basicConfig(level=logging.INFO)
