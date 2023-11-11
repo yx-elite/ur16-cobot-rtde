@@ -3,7 +3,8 @@ sys.path.append("..")
 import logging
 import rtde.rtde as rtde
 import rtde.rtde_config as rtde_config
-import time
+import matplotlib.pyplot as plt
+from time import time, sleep
 
 
 # logging.basicConfig(level=logging.INFO)
@@ -65,10 +66,12 @@ if not con.send_start():
     sys.exit()
 
 # Initialise plotting parameters
-# fx, fy, fz, frx, fry, frz = [], [], [], [], [], []
-# plot_time = []
+plot_time = []
+x, y, z, rx, ry, rz = [], [], [], [], [], []
+fx, fy, fz, frx, fry, frz = [], [], [], [], [], []
 
 # control loop
+rt_init = time()
 repetition_counter = 0
 repetition = 10
 move_completed = True
@@ -90,20 +93,38 @@ while keep_running:
             # send new setpoint
             con.send(setp)
             watchdog.input_int_register_0 = 1
+        
         elif not move_completed and state.output_int_register_0 == 0:
             print("Move to confirmed pose = " + str(state.target_q))
             move_completed = True
             watchdog.input_int_register_0 = 0
+            
             # Data returned from cobot
             tcp_pose = state.actual_TCP_pose
             tcp_force = state.actual_TCP_force
             print(f"Current pose = {tcp_pose}")
             print(f"Current force = {tcp_force}")
+            
+            # Input to list for graph plotting
+            rt_refresh = time()
+            op_time = rt_refresh -rt_init
+            print(f'Operation Time:{op_time}')
+            plot_time.append(op_time)
+            
+            x.append(tcp_pose[0])
+            y.append(tcp_pose[1])
+            z.append(tcp_pose[2])
+            rx.append(tcp_pose[3])
+            ry.append(tcp_pose[4])
+            rz.append(tcp_pose[5])
+            
+            
+            
             # Two motion in one repetition
             repetition_counter += 0.5
             print(repetition_counter)
             # Take care of movement delay
-            time.sleep(1)
+            sleep(1)
 
         # kick watchdog
         con.send(watchdog)
@@ -112,6 +133,30 @@ while keep_running:
 
 print('---------------------------------------------')
 print(f'{repetition} repetitions are completed successfully!')
+
+# Initialize graph plotting
+graph_plot = True
+if graph_plot:
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 10))
+
+    # Plot x, y, z in one graph
+    ax1.plot(plot_time, x, label='X')
+    ax1.plot(plot_time, y, label='Y')
+    ax1.plot(plot_time, z, label='Z')
+    ax1.set_xlabel('Time')
+    ax1.set_ylabel('Position')
+    ax1.legend()
+
+    # Plot rx, ry, rz on one graph
+    ax2.plot(plot_time, rx, label='RX')
+    ax2.plot(plot_time, ry, label='RY')
+    ax2.plot(plot_time, rz, label='RZ')
+    ax2.set_xlabel('Time')
+    ax2.set_ylabel('Rotation')
+    ax2.legend()
+
+    plt.show()
+    print('Plotting completed!')
 
 con.send_pause()
 
