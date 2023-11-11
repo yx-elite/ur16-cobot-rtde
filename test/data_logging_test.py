@@ -108,7 +108,7 @@ while keep_running:
             # Input to list for graph plotting
             rt_refresh = time()
             op_time = rt_refresh -rt_init
-            print(f'Operation Time:{op_time}')
+            print(f'Operation Time: {op_time}s')
             plot_time.append(op_time)
             
             x.append(tcp_pose[0])
@@ -117,8 +117,6 @@ while keep_running:
             rx.append(tcp_pose[3])
             ry.append(tcp_pose[4])
             rz.append(tcp_pose[5])
-            
-            
             
             # Two motion in one repetition
             repetition_counter += 0.5
@@ -137,8 +135,7 @@ print(f'{repetition} repetitions are completed successfully!')
 # Initialize graph plotting
 graph_plot = True
 if graph_plot:
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 10))
-
+    fig1, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 8))
     # Plot x, y, z in one graph
     ax1.plot(plot_time, x, label='X')
     ax1.plot(plot_time, y, label='Y')
@@ -146,7 +143,6 @@ if graph_plot:
     ax1.set_xlabel('Time')
     ax1.set_ylabel('Position')
     ax1.legend()
-
     # Plot rx, ry, rz on one graph
     ax2.plot(plot_time, rx, label='RX')
     ax2.plot(plot_time, ry, label='RY')
@@ -154,8 +150,8 @@ if graph_plot:
     ax2.set_xlabel('Time')
     ax2.set_ylabel('Rotation')
     ax2.legend()
-
     plt.show()
+    
     print('Plotting completed!')
 
 con.send_pause()
