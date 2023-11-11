@@ -90,14 +90,14 @@ while keep_running:
             print("Move to confirmed pose = " + str(state.target_q))
             move_completed = True
             watchdog.input_int_register_0 = 0
-            repetition_counter += 1
+            repetition_counter += 0.5
             print(repetition_counter)
 
         # kick watchdog
         con.send(watchdog)
     else:
         # Take care of robot delay. Can improve with actual_TCP_pose later
-        time.sleep(0.5)
+        time.sleep(1)
         print('---------------------------------------------')
         print(f'{repetition} repetitions are completed successfully!')
         break
