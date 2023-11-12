@@ -12,7 +12,7 @@ class Ur16GUI(tk.Tk):
         super().__init__()
 
         self.title("UR16 Joint Coordinate Extractor")
-        self.geometry("480x660")
+        self.geometry("480x770")
         self.config(bg = "#f0f0f0")
 
         style = ttk.Style()
@@ -78,16 +78,39 @@ class Ur16GUI(tk.Tk):
         label.pack(padx=20, pady=(20, 0))
 
     def create_widgets(self):
-        button_frame = ttk.Frame(self)
-        button_frame.pack(side="top", fill="both", expand=True, padx=20, pady=10)
+        # Create a general large frame
+        input_frame = ttk.Frame(self)
+        input_frame.pack(side="top", fill="both", expand=True, padx=20, pady=10)
         
-        connect_button = ttk.Button(button_frame, text="Connect", command=self.ur_init)
-        connect_button.pack(pady=10)
+        # Create a frame for config settings
+        connection_frame = ttk.Frame(input_frame)
+        connection_frame.pack(pady=10)
+        
+        # Create config input setup
+        self.fields = ["Robot Host", "Robot Port", "Config File"]
+        self.entries = []
+        default_texts = ['192.168.189.129', 30004, 'config/control_loop_configuration.xml']
+
+        for row, field in enumerate(self.fields):
+            label = ttk.Label(connection_frame, text=f"{field}\t:", font=('Arial', 10))
+            label.grid(row=row, column=0, padx=10, pady=5)
+
+            entry = ttk.Entry(connection_frame, width=40)
+            entry.grid(row=row, column=1, padx=10, pady=5)
+            self.entries.append(entry)
+            
+            # Add default text to the entry
+            default_text = default_texts[row]
+            entry.insert(0, default_text)
+        
+        connect_button = ttk.Button(connection_frame, text="Connect", command=self.ur_init)
+        connect_button.grid(row=len(self.fields), columnspan=2, pady=5)
+        # connect_button.pack(pady=10)
 
         self.textboxes = []
         self.buttons = []
         for i in range(6):
-            position_frame = ttk.Frame(button_frame)
+            position_frame = ttk.Frame(input_frame)
             position_frame.pack(pady=10)
 
             button = ttk.Button(position_frame, text=f"Record Position {i+1}", command=lambda j=i: self.button_clicked(j))
@@ -97,7 +120,7 @@ class Ur16GUI(tk.Tk):
             reset_button = ttk.Button(position_frame, text="Reset", command=lambda j=i: self.reset_textbox(j))
             reset_button.pack(side="left", padx=10)
 
-            textbox = tk.Text(button_frame, height=2, width=10, wrap="word")
+            textbox = tk.Text(input_frame, height=2, width=10, wrap="word")
             textbox.pack(fill="x", pady=(0,10))
             self.textboxes.append(textbox)
     
