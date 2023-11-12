@@ -1,9 +1,10 @@
-import tkinter as tk
+import sys
 import logging
+import csv
+import tkinter as tk
 import rtde.rtde as rtde
 import rtde.rtde_config as rtde_config
 import matplotlib.pyplot as plt
-import sys
 from tkinter import ttk, messagebox
 from time import time, sleep
 
@@ -263,7 +264,8 @@ class Ur16GUI(tk.Tk):
 
             print('---------------------------------------------')
             print(f'{repetition} repetitions are completed successfully!')
-
+            
+            self.log_data(plot_time, x, y, z, rx, ry, rz, fx, fy, fz, frx, fry, frz)
             self.plot_data(plot_time, x, y, z, rx, ry, rz, fx, fy, fz, frx, fry, frz)
 
             print('Plotting completed!')
@@ -273,13 +275,18 @@ class Ur16GUI(tk.Tk):
             print(f'Runtime completed in {op_time:.4f} seconds.')
 
 
-    def log_data(self):
+    def log_data(self, plot_time, x, y, z, rx, ry, rz, fx, fy, fz, frx, fry, frz):
         try:
-            # You can place the data logging code here
-            # Adjust as needed based on your specific requirements
-            print("Data logging function")
+            filename = 'robot_data_log.csv'
+            with open(filename, mode='w', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow(['Time', 'X', 'Y', 'Z', 'RX', 'RY', 'RZ', 'Fx', 'Fy', 'Fz', 'FRx', 'FRy', 'FRz'])
+                for i in range(len(plot_time)):
+                    writer.writerow([plot_time[i], x[i], y[i], z[i], rx[i], ry[i], rz[i], fx[i], fy[i], fz[i], frx[i], fry[i], frz[i]])
+            print(f"Data logged successfully to {filename}")
         except Exception as e:
             print(f"Error in log_data: {e}")
+
 
     def plot_data(self, plot_time, x, y, z, rx, ry, rz, fx, fy, fz, frx, fry, frz):
         # Initialize graph plotting
