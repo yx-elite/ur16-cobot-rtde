@@ -4,7 +4,6 @@ import rtde.rtde as rtde
 import rtde.rtde_config as rtde_config
 import sys
 from tkinter import ttk, messagebox
-from config import ROBOT_HOST, ROBOT_PORT, config_filename
 
 
 class Ur16GUI(tk.Tk):
@@ -12,7 +11,7 @@ class Ur16GUI(tk.Tk):
         super().__init__()
 
         self.title("UR16 Joint Coordinate Extractor")
-        self.geometry("480x770")
+        self.geometry("500x770")
         self.config(bg = "#f0f0f0")
 
         style = ttk.Style()
@@ -39,6 +38,11 @@ class Ur16GUI(tk.Tk):
 
     def ur_init(self):
         try:
+            # Extract the user input from user entries
+            ROBOT_HOST = str(self.entries[0].get())
+            ROBOT_PORT = int(self.entries[1].get())
+            config_filename = str(self.entries[2].get())
+            
             logging.getLogger().setLevel(logging.INFO)
 
             conf = rtde_config.ConfigFile(config_filename)
@@ -89,7 +93,7 @@ class Ur16GUI(tk.Tk):
         # Create config input setup
         self.fields = ["Robot Host", "Robot Port", "Config File"]
         self.entries = []
-        default_texts = ['192.168.189.129', 30004, 'config/control_loop_configuration.xml']
+        default_texts = ['192.168.189.129', 30004, 'config/main-config.xml']
 
         for row, field in enumerate(self.fields):
             label = ttk.Label(connection_frame, text=f"{field}\t:", font=('Arial', 10))
@@ -109,7 +113,7 @@ class Ur16GUI(tk.Tk):
 
         self.textboxes = []
         self.buttons = []
-        for i in range(6):
+        for i in range(5):
             position_frame = ttk.Frame(input_frame)
             position_frame.pack(pady=10)
 
