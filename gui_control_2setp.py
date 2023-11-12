@@ -2,8 +2,10 @@ import tkinter as tk
 import logging
 import rtde.rtde as rtde
 import rtde.rtde_config as rtde_config
+import matplotlib.pyplot as plt
 import sys
 from tkinter import ttk, messagebox
+from time import time, sleep
 
 
 class Ur16GUI(tk.Tk):
@@ -93,7 +95,7 @@ class Ur16GUI(tk.Tk):
         # Create config input setup
         self.fields = ["Robot Host", "Robot Port", "Config File"]
         self.entries = []
-        default_texts = ['192.168.189.129', 30004, 'config/main-config.xml']
+        default_texts = ['192.168.189.129', 30004, 'test/data-logging-config.xml']
 
         for row, field in enumerate(self.fields):
             connection_label = ttk.Label(connection_frame, text=f"{field}\t:", font=('Arial', 10))
@@ -119,10 +121,10 @@ class Ur16GUI(tk.Tk):
         rep_label = ttk.Label(control_frame, text="Repetition Count :", font=('Arial', 10))
         rep_label.pack(side="left", padx=10, pady=0)
         
-        rep_entry = ttk.Entry(control_frame, width=5)
-        rep_entry.pack(side="left", padx=(0, 100))
+        self.rep_entry = ttk.Entry(control_frame, width=5)
+        self.rep_entry.pack(side="left", padx=(0, 100))
         
-        run_button = ttk.Button(control_frame, text="Run")
+        run_button = ttk.Button(control_frame, text="Run", command=self.run_robot)
         run_button.pack(side="right", padx=5)
         
         log_button = ttk.Button(control_frame, text="Log Data")
@@ -161,6 +163,146 @@ class Ur16GUI(tk.Tk):
     
     def reset_textbox(self, index):
         self.textboxes[index].delete("1.0", "end")
+    
+    def run_robot(self):
+        try:
+            # 
+            setp1 = [float(value) for value in self.textboxes[0].get("1.0", tk.END).strip().split()]
+            setp2 = [float(value) for value in self.textboxes[1].get("1.0", tk.END).strip().split()]
+
+
+            self.setp.input_double_register_0 = 0
+            self.setp.input_double_register_1 = 0
+            self.setp.input_double_register_2 = 0
+            self.setp.input_double_register_3 = 0
+            self.setp.input_double_register_4 = 0
+            self.setp.input_double_register_5 = 0
+
+            self.watchdog.input_int_register_0 = 0
+            
+            def setp_to_list(sp):
+                sp_list = []
+                for i in range(0, 6):
+                    sp_list.append(sp.__dict__["input_double_register_%i" % i])
+                return sp_list
+            
+            def list_to_setp(sp, lst):
+                for i in range(0, 6):
+                    sp.__dict__["input_double_register_%i" % i] = lst[i]
+                return sp
+
+            if not self.con.send_start():
+                sys.exit()
+
+            plot_time = []
+            x, y, z, rx, ry, rz = [], [], [], [], [], []
+            fx, fy, fz, frx, fry, frz = [], [], [], [], [], []
+
+            rt_init = time()
+            repetition_counter = 0
+            repetition = int(self.rep_entry.get())
+            move_completed = True
+
+            while repetition_counter < repetition:
+                state = self.con.receive()
+
+                if state is None:
+                    break
+
+                if move_completed and state.output_int_register_0 == 1:
+                    move_completed = False
+                    new_setp = setp1 if setp_to_list(self.setp) == setp2 else setp2
+                    list_to_setp(self.setp, new_setp)
+                    print("New pose = " + str(new_setp))
+                    self.con.send(self.setp)
+                    self.watchdog.input_int_register_0 = 1
+
+                elif not move_completed and state.output_int_register_0 == 0:
+                    print("Move to confirmed pose = " + str(state.target_q))
+                    move_completed = True
+                    self.watchdog.input_int_register_0 = 0
+
+                    tcp_pose = state.actual_TCP_pose
+                    tcp_force = state.actual_TCP_force
+                    print(f"Current pose = {tcp_pose}")
+                    print(f"Current force = {tcp_force}")
+
+                    rt_refresh = time()
+                    op_time = rt_refresh - rt_init
+                    print(f'Operation Time: {op_time}s')
+                    plot_time.append(op_time)
+
+                    x.append(tcp_pose[0])
+                    y.append(tcp_pose[1])
+                    z.append(tcp_pose[2])
+                    rx.append(tcp_pose[3])
+                    ry.append(tcp_pose[4])
+                    rz.append(tcp_pose[5])
+
+                    fx.append(tcp_force[0])
+                    fy.append(tcp_force[1])
+                    fz.append(tcp_force[2])
+                    frx.append(tcp_force[3])
+                    fry.append(tcp_force[4])
+                    frz.append(tcp_force[5])
+
+                    repetition_counter += 0.5
+                    print(repetition_counter)
+                    sleep(1)
+
+                self.con.send(self.watchdog)
+
+            print('---------------------------------------------')
+            print(f'{repetition} repetitions are completed successfully!')
+
+            self.plot_data(plot_time, x, y, z, rx, ry, rz, fx, fy, fz, frx, fry, frz)
+
+            print('Plotting completed!')
+        finally:
+            print('Fail')
+
+
+    def log_data(self):
+        try:
+            # You can place the data logging code here
+            # Adjust as needed based on your specific requirements
+            print("Data logging function")
+        except Exception as e:
+            print(f"Error in log_data: {e}")
+
+    def plot_data(self, plot_time, x, y, z, rx, ry, rz, fx, fy, fz, frx, fry, frz):
+        # Initialize graph plotting
+        fig1, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 8))
+        ax1.plot(plot_time, x, label='x')
+        ax1.plot(plot_time, y, label='y')
+        ax1.plot(plot_time, z, label='z')
+        ax1.set_xlabel('Operation Time (s)')
+        ax1.set_ylabel('Real Time Position Coordinate')
+        ax1.legend()
+
+        ax2.plot(plot_time, rx, label='rx')
+        ax2.plot(plot_time, ry, label='ry')
+        ax2.plot(plot_time, rz, label='rz')
+        ax2.set_xlabel('Operation Time (s)')
+        ax2.set_ylabel('Real Time Angular Coordinate')
+        ax2.legend()
+
+        fig2, (ax3, ax4) = plt.subplots(2, 1, figsize=(8, 8))
+        ax3.plot(plot_time, fx, label='Fx')
+        ax3.plot(plot_time, fy, label='Fy')
+        ax3.plot(plot_time, fz, label='Fz')
+        ax3.set_xlabel('Operation Time (s)')
+        ax3.set_ylabel('Real Time Joint Force')
+        ax3.legend()
+
+        ax4.plot(plot_time, frx, label='Frx')
+        ax4.plot(plot_time, fry, label='Fry')
+        ax4.plot(plot_time, frz, label='Frz')
+        ax4.set_xlabel('Operation Time (s)')
+        ax4.set_ylabel('Real Time Joint Torque')
+        ax4.legend()
+        plt.show()
+
 
     def on_closing(self):
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
