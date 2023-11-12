@@ -22,7 +22,7 @@ class Ur16GUI(tk.Tk):
 
         self.create_instruction()
         self.create_widgets()
-        
+
         # Display connection status on bottom left of main window
         status_label = ttk.Label(self, text="Status:", font=('Arial', 8))
         status_label.pack(side="left", padx=(10, 0), pady=(0, 5))
@@ -126,12 +126,10 @@ class Ur16GUI(tk.Tk):
         
         run_button = ttk.Button(control_frame, text="Run", command=self.run_robot)
         run_button.pack(side="right", padx=5)
-        
-        log_button = ttk.Button(control_frame, text="Log Data")
-        log_button.pack(side="right", padx=5)
-        
-        csv_button = ttk.Button(control_frame, text="Export CSV")
-        csv_button.pack(side="right", padx=5)
+        # log_button = ttk.Button(control_frame, text="Log Data")
+        # log_button.pack(side="right", padx=5)
+        # csv_button = ttk.Button(control_frame, text="Export CSV")
+        # csv_button.pack(side="right", padx=5)
 
         self.textboxes = []
         self.buttons = []
@@ -165,11 +163,13 @@ class Ur16GUI(tk.Tk):
         self.textboxes[index].delete("1.0", "end")
     
     def run_robot(self):
+        op_time = 0
         try:
-            # 
+            # Strip to remove all empty spaces from entries & spilt using comma into list
             setp1 = [float(value) for value in self.textboxes[0].get("1.0", tk.END).strip().split()]
             setp2 = [float(value) for value in self.textboxes[1].get("1.0", tk.END).strip().split()]
-
+            #setp1 = list(map(float, self.textboxes[0].get("1.0", tk.END).strip().split()))
+            #setp2 = list(map(float, self.textboxes[1].get("1.0", tk.END).strip().split()))
 
             self.setp.input_double_register_0 = 0
             self.setp.input_double_register_1 = 0
@@ -186,23 +186,27 @@ class Ur16GUI(tk.Tk):
                     sp_list.append(sp.__dict__["input_double_register_%i" % i])
                 return sp_list
             
-            def list_to_setp(sp, lst):
+            def list_to_setp(sp, list):
                 for i in range(0, 6):
-                    sp.__dict__["input_double_register_%i" % i] = lst[i]
+                    sp.__dict__["input_double_register_%i" % i] = list[i]
                 return sp
 
+            # Start data synchronization
             if not self.con.send_start():
                 sys.exit()
 
+            # Initialise plotting parameters
             plot_time = []
             x, y, z, rx, ry, rz = [], [], [], [], [], []
             fx, fy, fz, frx, fry, frz = [], [], [], [], [], []
 
+            # Initialise looping parameters
             rt_init = time()
             repetition_counter = 0
             repetition = int(self.rep_entry.get())
             move_completed = True
 
+            # Robot main control loop
             while repetition_counter < repetition:
                 state = self.con.receive()
 
@@ -214,6 +218,7 @@ class Ur16GUI(tk.Tk):
                     new_setp = setp1 if setp_to_list(self.setp) == setp2 else setp2
                     list_to_setp(self.setp, new_setp)
                     print("New pose = " + str(new_setp))
+                    # Send new setpoint
                     self.con.send(self.setp)
                     self.watchdog.input_int_register_0 = 1
 
@@ -222,14 +227,16 @@ class Ur16GUI(tk.Tk):
                     move_completed = True
                     self.watchdog.input_int_register_0 = 0
 
+                    # Data returned from cobot
                     tcp_pose = state.actual_TCP_pose
                     tcp_force = state.actual_TCP_force
                     print(f"Current pose = {tcp_pose}")
                     print(f"Current force = {tcp_force}")
 
+                    # Input to list for graph plotting
                     rt_refresh = time()
                     op_time = rt_refresh - rt_init
-                    print(f'Operation Time: {op_time}s')
+                    print(f'Operation Time: {op_time:.4f} seconds')
                     plot_time.append(op_time)
 
                     x.append(tcp_pose[0])
@@ -246,8 +253,10 @@ class Ur16GUI(tk.Tk):
                     fry.append(tcp_force[4])
                     frz.append(tcp_force[5])
 
+                    # Two motions in one repetition
                     repetition_counter += 0.5
                     print(repetition_counter)
+                    # Handle movement delay
                     sleep(1)
 
                 self.con.send(self.watchdog)
@@ -258,8 +267,10 @@ class Ur16GUI(tk.Tk):
             self.plot_data(plot_time, x, y, z, rx, ry, rz, fx, fy, fz, frx, fry, frz)
 
             print('Plotting completed!')
+        except Exception as e:
+            print(f"Error in run_robot: {e}")
         finally:
-            print('Fail')
+            print(f'Runtime completed in {op_time:.4f} seconds.')
 
 
     def log_data(self):
