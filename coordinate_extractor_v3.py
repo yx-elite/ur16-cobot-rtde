@@ -11,7 +11,7 @@ class Ur16GUI(tk.Tk):
         super().__init__()
 
         self.title("UR16 Joint Coordinate Extractor")
-        self.geometry("500x770")
+        self.geometry("550x700")
         self.config(bg = "#f0f0f0")
 
         style = ttk.Style()
