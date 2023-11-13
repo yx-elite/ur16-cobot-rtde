@@ -142,6 +142,44 @@ print(f'{repetition} repetitions are completed successfully!')
 # Initialize graph plotting
 graph_plot = True
 if graph_plot:
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(12, 10))
+    
+    # Plot x, y, z in the first subplot
+    ax1.plot(plot_time, x, label='x')
+    ax1.plot(plot_time, y, label='y')
+    ax1.plot(plot_time, z, label='z')
+    ax1.set_xlabel('Operation Time (s)')
+    ax1.set_ylabel('Real Time Position Coordinate')
+    ax1.legend()
+
+    # Plot rx, ry, rz in the second subplot
+    ax2.plot(plot_time, rx, label='rx')
+    ax2.plot(plot_time, ry, label='ry')
+    ax2.plot(plot_time, rz, label='rz')
+    ax2.set_xlabel('Operation Time (s)')
+    ax2.set_ylabel('Real Time Angular Coordinate')
+    ax2.legend()
+
+    # Plot Fx, Fy, Fz in the third subplot
+    ax3.plot(plot_time, fx, label='Fx')
+    ax3.plot(plot_time, fy, label='Fy')
+    ax3.plot(plot_time, fz, label='Fz')
+    ax3.set_xlabel('Operation Time (s)')
+    ax3.set_ylabel('Real Time Joint Force')
+    ax3.legend()
+
+    # Plot Frx, Fry, Frz in the fourth subplot
+    ax4.plot(plot_time, frx, label='Frx')
+    ax4.plot(plot_time, fry, label='Fry')
+    ax4.plot(plot_time, frz, label='Frz')
+    ax4.set_xlabel('Operation Time (s)')
+    ax4.set_ylabel('Real Time Joint Torque')
+    ax4.legend()
+
+    #plt.tight_layout()
+    plt.show()
+    
+    ''' 
     fig1, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 8))
     # Plot x, y, z in one graph
     ax1.plot(plot_time, x, label='x')
@@ -173,7 +211,7 @@ if graph_plot:
     ax4.set_xlabel('Operation Time (s)')
     ax4.set_ylabel('Real Time Joint Torque')
     ax4.legend()
-    plt.show()
+    '''
     
     print('Plotting completed!')
 

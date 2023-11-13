@@ -46,6 +46,8 @@ class Ur16GUI(tk.Tk):
             ROBOT_PORT = int(self.entries[1].get())
             config_filename = str(self.entries[2].get())
             
+            self.keep_running = True
+            
             logging.getLogger().setLevel(logging.INFO)
 
             conf = rtde_config.ConfigFile(config_filename)
@@ -56,7 +58,7 @@ class Ur16GUI(tk.Tk):
             self.con = rtde.RTDE(ROBOT_HOST, ROBOT_PORT)
             self.con.connect()
 
-            ver = self.con.get_controller_version()
+            self.con.get_controller_version()
 
             self.con.send_output_setup(state_names, state_types)
             self.setp = self.con.send_input_setup(setp_names, setp_types)
@@ -208,59 +210,62 @@ class Ur16GUI(tk.Tk):
             move_completed = True
 
             # Robot main control loop
-            while repetition_counter < repetition:
-                state = self.con.receive()
+            while self.keep_running:
+                if repetition_counter < repetition:
+                    state = self.con.receive()
 
-                if state is None:
+                    if state is None:
+                        break
+
+                    if move_completed and state.output_int_register_0 == 1:
+                        move_completed = False
+                        new_setp = setp1 if setp_to_list(self.setp) == setp2 else setp2
+                        list_to_setp(self.setp, new_setp)
+                        print("New pose = " + str(new_setp))
+                        # Send new setpoint
+                        self.con.send(self.setp)
+                        self.watchdog.input_int_register_0 = 1
+
+                    elif not move_completed and state.output_int_register_0 == 0:
+                        print("Move to confirmed pose = " + str(state.target_q))
+                        move_completed = True
+                        self.watchdog.input_int_register_0 = 0
+
+                        # Data returned from cobot
+                        tcp_pose = state.actual_TCP_pose
+                        tcp_force = state.actual_TCP_force
+                        print(f"Current pose = {tcp_pose}")
+                        print(f"Current force = {tcp_force}")
+
+                        # Input to list for graph plotting
+                        rt_refresh = time()
+                        op_time = rt_refresh - rt_init
+                        print(f'Operation Time: {op_time:.4f} seconds')
+                        plot_time.append(op_time)
+
+                        x.append(tcp_pose[0])
+                        y.append(tcp_pose[1])
+                        z.append(tcp_pose[2])
+                        rx.append(tcp_pose[3])
+                        ry.append(tcp_pose[4])
+                        rz.append(tcp_pose[5])
+
+                        fx.append(tcp_force[0])
+                        fy.append(tcp_force[1])
+                        fz.append(tcp_force[2])
+                        frx.append(tcp_force[3])
+                        fry.append(tcp_force[4])
+                        frz.append(tcp_force[5])
+
+                        # Two motions in one repetition
+                        repetition_counter += 0.5
+                        print(repetition_counter)
+                        # Handle movement delay
+                        sleep(1)
+
+                    self.con.send(self.watchdog)
+                else:
                     break
-
-                if move_completed and state.output_int_register_0 == 1:
-                    move_completed = False
-                    new_setp = setp1 if setp_to_list(self.setp) == setp2 else setp2
-                    list_to_setp(self.setp, new_setp)
-                    print("New pose = " + str(new_setp))
-                    # Send new setpoint
-                    self.con.send(self.setp)
-                    self.watchdog.input_int_register_0 = 1
-
-                elif not move_completed and state.output_int_register_0 == 0:
-                    print("Move to confirmed pose = " + str(state.target_q))
-                    move_completed = True
-                    self.watchdog.input_int_register_0 = 0
-
-                    # Data returned from cobot
-                    tcp_pose = state.actual_TCP_pose
-                    tcp_force = state.actual_TCP_force
-                    print(f"Current pose = {tcp_pose}")
-                    print(f"Current force = {tcp_force}")
-
-                    # Input to list for graph plotting
-                    rt_refresh = time()
-                    op_time = rt_refresh - rt_init
-                    print(f'Operation Time: {op_time:.4f} seconds')
-                    plot_time.append(op_time)
-
-                    x.append(tcp_pose[0])
-                    y.append(tcp_pose[1])
-                    z.append(tcp_pose[2])
-                    rx.append(tcp_pose[3])
-                    ry.append(tcp_pose[4])
-                    rz.append(tcp_pose[5])
-
-                    fx.append(tcp_force[0])
-                    fy.append(tcp_force[1])
-                    fz.append(tcp_force[2])
-                    frx.append(tcp_force[3])
-                    fry.append(tcp_force[4])
-                    frz.append(tcp_force[5])
-
-                    # Two motions in one repetition
-                    repetition_counter += 0.5
-                    print(repetition_counter)
-                    # Handle movement delay
-                    sleep(1)
-
-                self.con.send(self.watchdog)
 
             print('---------------------------------------------')
             print(f'{repetition} repetitions are completed successfully!')

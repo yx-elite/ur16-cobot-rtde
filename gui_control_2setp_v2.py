@@ -58,7 +58,7 @@ class Ur16GUI(tk.Tk):
             self.con = rtde.RTDE(ROBOT_HOST, ROBOT_PORT)
             self.con.connect()
 
-            ver = self.con.get_controller_version()
+            self.con.get_controller_version()
 
             self.con.send_output_setup(state_names, state_types)
             self.setp = self.con.send_input_setup(setp_names, setp_types)
