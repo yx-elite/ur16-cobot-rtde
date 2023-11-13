@@ -295,7 +295,7 @@ class Ur16GUI(tk.Tk):
 
     def plot_data(self, plot_time, x, y, z, rx, ry, rz, fx, fy, fz, frx, fry, frz):
         # Initialize graph plotting
-        fig1, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 8))
+        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(12, 10))
         ax1.plot(plot_time, x, label='x')
         ax1.plot(plot_time, y, label='y')
         ax1.plot(plot_time, z, label='z')
@@ -310,7 +310,6 @@ class Ur16GUI(tk.Tk):
         ax2.set_ylabel('Real Time Angular Coordinate')
         ax2.legend()
 
-        fig2, (ax3, ax4) = plt.subplots(2, 1, figsize=(8, 8))
         ax3.plot(plot_time, fx, label='Fx')
         ax3.plot(plot_time, fy, label='Fy')
         ax3.plot(plot_time, fz, label='Fz')
@@ -324,6 +323,8 @@ class Ur16GUI(tk.Tk):
         ax4.set_xlabel('Operation Time (s)')
         ax4.set_ylabel('Real Time Joint Torque')
         ax4.legend()
+        
+        #plt.tight_layout()
         plt.show()
 
 
