@@ -129,10 +129,10 @@ class Ur16GUI(tk.Tk):
         
         run_button = ttk.Button(control_frame, text="Run", command=self.run_robot)
         run_button.pack(side="right", padx=5)
-        # log_button = ttk.Button(control_frame, text="Log Data")
-        # log_button.pack(side="right", padx=5)
-        # csv_button = ttk.Button(control_frame, text="Export CSV")
-        # csv_button.pack(side="right", padx=5)
+        #log_button = ttk.Button(control_frame, text="Log Data")
+        #log_button.pack(side="right", padx=5)
+        #csv_button = ttk.Button(control_frame, text="Export CSV")
+        #csv_button.pack(side="right", padx=5)
 
         self.textboxes = []
         self.buttons = []
