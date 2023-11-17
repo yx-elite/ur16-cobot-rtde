@@ -23,14 +23,20 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import sys
+
 sys.path.append("..")
 import logging
+
 import rtde.rtde as rtde
 import rtde.rtde_config as rtde_config
-from config import ROBOT_HOST, ROBOT_PORT, config_filename
 
 
 # logging.basicConfig(level=logging.INFO)
+
+#ROBOT_HOST = '192.168.189.129'
+ROBOT_HOST = '169.254.6.28'
+ROBOT_PORT = 30004
+config_filename = "control_loop_configuration.xml"
 
 keep_running = True
 
@@ -53,8 +59,8 @@ setp = con.send_input_setup(setp_names, setp_types)
 watchdog = con.send_input_setup(watchdog_names, watchdog_types)
 
 # Setpoints to move the robot to
-setp1 = [-0.11999999732554396, -0.48350302919797317, 0.5643574832608138, 1.2054759732018596e-15, 3.109999895095828, 0.03999999910593764]
-setp2 = [-0.1199999973424296, -0.6753453624175927, 0.15051514995399318, -1.2743603145272124e-14, 3.109999895095813, 0.03999999910596153]
+setp1 = [-0.12, -0.43, 0.14, 0, 3.11, 0.04]
+setp2 = [-0.12, -0.51, 0.21, 0, 3.11, 0.04]
 
 setp.input_double_register_0 = 0
 setp.input_double_register_1 = 0
