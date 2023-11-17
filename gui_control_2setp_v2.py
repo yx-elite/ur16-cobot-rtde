@@ -1,4 +1,3 @@
-# Beta testing
 
 import sys
 import logging
